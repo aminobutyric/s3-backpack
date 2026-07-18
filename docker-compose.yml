@@ -1,0 +1,38 @@
+services:
+  garage:
+    image: dxflrs/garage:v2.3.0
+    container_name: s3gw-garage
+    restart: unless-stopped
+    ports:
+      - "3900:3900"   # S3 API
+      - "3903:3903"   # Admin API
+    volumes:
+      - ./garage/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    environment:
+      GARAGE_DEFAULT_ACCESS_KEY: ${GARAGE_DEFAULT_ACCESS_KEY}
+      GARAGE_DEFAULT_SECRET_KEY: ${GARAGE_DEFAULT_SECRET_KEY}
+      GARAGE_DEFAULT_BUCKET: ${GARAGE_DEFAULT_BUCKET:-default-bucket}
+    # --single-node: no replication, matches replication_factor=1 in garage.toml
+    # --default-bucket: auto-creates the key+bucket above on first boot (Garage v2.3.0+)
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
+
+  backend:
+    build: ./backend
+    container_name: s3gw-backend
+    restart: unless-stopped
+    depends_on:
+      - garage
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Overrides .env's S3_ENDPOINT_URL: inside the compose network the
+      # backend reaches Garage by service name, not localhost.
+      S3_ENDPOINT_URL: http://garage:3900
+
+volumes:
+  garage-meta:
+  garage-data:

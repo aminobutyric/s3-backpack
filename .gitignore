@@ -1,0 +1,6 @@
+.env
+garage/garage.toml
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
