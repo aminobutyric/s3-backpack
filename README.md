@@ -3,6 +3,8 @@
 Garage-backed S3-compatible storage gateway with a small authenticated FastAPI
 surface for object CRUD.
 
+> Status: early development. APIs, config, and deployment flow may change before v1.
+
 ## Local Tests
 
 From the backend directory:
