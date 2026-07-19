@@ -23,3 +23,11 @@ pytest tests/test_storage_garage.py
 
 Keep route code provider-agnostic: API modules should depend on
 `StorageBackend`, not on `GarageBackend` directly.
+
+
+## Future contributor workflow should use short-lived branches from develop:
+```bash
+git switch develop
+git pull --ff-only
+git switch -c feature/transparent-downloads
+```
