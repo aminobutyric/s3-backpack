@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from io import BytesIO
 
 import pytest
+import zstandard
 from fastapi import HTTPException, UploadFile
 
 from app.config import Settings, get_settings
@@ -94,3 +95,24 @@ def test_crud_route_handlers_upload_list_download_delete(
     with pytest.raises(HTTPException) as exc:
         asyncio.run(download_object(key="docs/readme.txt", storage=storage))
     assert exc.value.status_code == 404
+
+
+def test_upload_compresses_text_and_reports_actual_stored_object(
+    storage: InMemoryStorage,
+) -> None:
+    original = b"same structured log record\n" * 400
+    file = UploadFile(filename="events.log", file=BytesIO(original))
+
+    uploaded = asyncio.run(upload_object(file=file, storage=storage, key=None))
+
+    assert uploaded.key == "events.log.zst"
+    assert uploaded.original_key == "events.log"
+    assert uploaded.original_size == len(original)
+    assert uploaded.size == len(storage.objects["events.log.zst"])
+    assert uploaded.compression == "zstd"
+    assert uploaded.saved_bytes == uploaded.original_size - uploaded.size
+    assert uploaded.savings_percent > 90
+    assert (
+        zstandard.ZstdDecompressor().decompress(storage.objects["events.log.zst"])
+        == original
+    )

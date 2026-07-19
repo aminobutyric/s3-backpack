@@ -34,6 +34,10 @@ Check the backend:
 curl http://localhost:8000/healthz
 ```
 
+Open `http://localhost:8000` for the web UI. Enter the value of `API_KEY`
+from `.env`; it is kept in browser session storage for the current tab and is
+sent to the backend as the `X-API-Key` header.
+
 Upload, list, download, and delete an object:
 
 ```bash
@@ -46,11 +50,29 @@ curl -sS -H "X-API-Key: dev-api-key-change-me" \
   "http://localhost:8000/api/objects?prefix=test/"
 
 curl -sS -H "X-API-Key: dev-api-key-change-me" \
-  http://localhost:8000/api/objects/test/hello.txt
+  http://localhost:8000/api/objects/test/hello.txt.zst \
+  --output /tmp/hello.txt.zst
 
 curl -sS -X DELETE -H "X-API-Key: dev-api-key-change-me" \
-  http://localhost:8000/api/objects/test/hello.txt
+  http://localhost:8000/api/objects/test/hello.txt.zst
 ```
+
+The upload response contains the actual stored key. Compressible text and log
+files are stored with a `.zst` suffix; PNG, BMP, and TIFF images are stored with
+a `.webp` suffix. A transformation is used only when its output is smaller.
+Already-compressed formats such as ZIP, gzip, MP4, JPEG, WebP, and zstd are
+stored unchanged.
+
+This behavior is deliberately visible rather than transparent: Garage and
+other S3 clients see the transformed object and its real format. Decompress a
+downloaded text object with any zstd-compatible tool, for example:
+
+```bash
+zstd --decompress /tmp/hello.txt.zst
+```
+
+The API documents its request and response schemas at
+`http://localhost:8000/docs`.
 
 ## Regenerate Garage Secrets
 

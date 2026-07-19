@@ -60,6 +60,10 @@ Previous draft stacked ~3 MVPs into one v1 (dual backend + drive detection + com
   - Images → WebP, quality 85
   - Text/logs → zstd, level 3
   - Skip-list (already compressed, don't touch): `.zip`, `.gz`, `.mp4`, `.jpg`
+  - Store transformed objects under an extension matching their real format
+    (`.webp` or `.zst`) and return that key to the caller
+  - Keep the original unchanged when compression would increase its size or
+    when input decoding fails
 - Web UI: htmx + Jinja2 (or vanilla JS + FastAPI static files) — upload, browse, delete. Not React: this audience wants to open DevTools and understand what's happening; small bundle matters on a Pi.
 - `docker-compose up` deployment, config via `.env`
 
@@ -99,5 +103,4 @@ Previous draft stacked ~3 MVPs into one v1 (dual backend + drive detection + com
 
 - Finalize MVP in/out list (Section 6) — draft only so far.
 - Repo/package name and branding.
-- Compression: which formats/strategies ship in v1 vs. later (see brainstorm backlog).
 - Docs structure for launch (README, ARCHITECTURE.md, CONTRIBUTING.md).

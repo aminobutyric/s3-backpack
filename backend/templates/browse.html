@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Objects - S3 Gateway{% endblock %}
+
+{% block body %}
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="S3 Gateway home">
+      <span class="brand-mark" aria-hidden="true">S3</span>
+      <span>S3 Gateway</span>
+    </a>
+    <div class="connection">
+      <span id="connection-dot" class="connection-dot" aria-hidden="true"></span>
+      <span id="connection-label">Not connected</span>
+      <button id="change-key" class="button button-quiet" type="button">Change key</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-labelledby="objects-heading">
+      <div>
+        <h1 id="objects-heading">Objects</h1>
+        <p id="object-count" class="muted">Connect to load objects</p>
+      </div>
+      <form id="prefix-form" class="prefix-form" role="search">
+        <label class="sr-only" for="prefix">Filter by key prefix</label>
+        <input id="prefix" name="prefix" type="search" placeholder="Filter by prefix">
+        <button class="button button-secondary" type="submit">Filter</button>
+        <button id="refresh" class="icon-button" type="button" aria-label="Refresh objects" title="Refresh objects">&#8635;</button>
+      </form>
+    </section>
+
+    {% include "upload.html" %}
+
+    <section class="object-section" aria-live="polite">
+      <div id="table-loading" class="state-message" hidden>Loading objects...</div>
+      <div id="table-error" class="state-message state-error" hidden></div>
+      <div id="empty-state" class="state-message" hidden>No objects found.</div>
+      <div id="object-table-wrap" class="table-wrap" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Object key</th>
+              <th scope="col">Size</th>
+              <th scope="col">Modified</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="object-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="auth-dialog" class="dialog" aria-labelledby="auth-title">
+    <form id="auth-form" method="dialog">
+      <h2 id="auth-title">Connect to gateway</h2>
+      <p class="muted">Enter the API key configured for this server.</p>
+      <label for="api-key">API key</label>
+      <input id="api-key" name="api-key" type="password" autocomplete="current-password" required>
+      <p id="auth-error" class="form-error" hidden></p>
+      <div class="dialog-actions">
+        <button class="button button-primary" type="submit">Connect</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="delete-dialog" class="dialog" aria-labelledby="delete-title">
+    <form id="delete-form" method="dialog">
+      <h2 id="delete-title">Delete object?</h2>
+      <p id="delete-key" class="object-key-confirm"></p>
+      <p class="muted">This action cannot be undone.</p>
+      <div class="dialog-actions">
+        <button id="cancel-delete" class="button button-secondary" type="button">Cancel</button>
+        <button class="button button-danger" type="submit">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}

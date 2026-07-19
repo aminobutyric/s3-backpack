@@ -4,6 +4,7 @@ s3-gateway/
 │   │   ├── __init__.py
 │   │   ├── main.py                # FastAPI entrypoint
 │   │   ├── config.py               # env-based config
+│   │   ├── web.py                  # server-rendered web UI entrypoint
 │   │   ├── auth/
 │   │   │   ├── __init__.py
 │   │   │   ├── api_key.py          # API key generation/validation
@@ -29,7 +30,7 @@ s3-gateway/
 │   │   ├── base.html
 │   │   ├── browse.html
 │   │   └── upload.html
-│   ├── static/                     # htmx.js, minimal CSS/JS
+│   ├── static/                     # dependency-free browser CSS/JS
 │   ├── tests/
 │   │   ├── __init__.py
 │   │   ├── test_storage_garage.py

@@ -1,0 +1,23 @@
+<section class="upload-panel" aria-labelledby="upload-heading">
+  <div class="upload-heading">
+    <div>
+      <h2 id="upload-heading">Upload</h2>
+      <p class="muted">Supported files are compressed when the result is smaller.</p>
+    </div>
+  </div>
+  <form id="upload-form">
+    <div id="drop-zone" class="drop-zone">
+      <input id="file" name="file" type="file" required>
+      <label for="file">
+        <strong id="file-label">Choose a file</strong>
+        <span>or drop it here</span>
+      </label>
+    </div>
+    <div class="key-field">
+      <label for="object-key">Object key <span class="muted">(optional)</span></label>
+      <input id="object-key" name="key" type="text" placeholder="folder/filename.ext">
+    </div>
+    <button id="upload-button" class="button button-primary" type="submit">Upload</button>
+  </form>
+  <div id="upload-result" class="upload-result" hidden></div>
+</section>
