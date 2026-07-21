@@ -31,7 +31,7 @@ def test_object_browser_and_static_assets_are_served() -> None:
     script = (static_dir / "app.js").read_text()
 
     assert page.status_code == 200
-    assert "S3 Gateway" in html
+    assert "S3 Backpack" in html
     assert "API key" in html
     assert "/static/style.css" in html
     assert "/static/app.js" in html

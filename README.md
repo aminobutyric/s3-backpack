@@ -1,9 +1,9 @@
-# Self-Hosted S3 Gateway
+# S3 Backpack
 
 Garage-backed S3-compatible storage gateway with a small authenticated FastAPI
 surface for object CRUD.
 
-> Status: early development. APIs, config, and deployment flow may change before v1.
+> Status: v1 scope finalized. The project is preparing for its first stable release.
 
 ## Local Tests
 

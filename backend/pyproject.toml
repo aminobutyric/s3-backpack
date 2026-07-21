@@ -1,7 +1,7 @@
 [project]
-name = "s3-gateway-backend"
+name = "s3-backpack-backend"
 version = "0.1.0"
-description = "Backend service for the self-hosted S3 gateway (v1: Garage backend, compression, auth)"
+description = "S3 Backpack backend (v1: Garage storage, compression, and authentication)"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.110,<0.116",

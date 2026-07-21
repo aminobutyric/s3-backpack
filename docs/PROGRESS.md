@@ -2,52 +2,53 @@
 
 ## v1
 
-Storage abstraction interface
+[x] Storage abstraction interface
 
-Garage S3-compatible backend
+[x] Garage S3-compatible backend
 
-Upload, list, download, existence check, and delete operations
+[x] Upload, list, download, existence check, and delete operations
 
-Required API-key authentication
+[x] Required API-key authentication
 
-Text/log compression using zstd level 3
+[x] Text/log compression using zstd level 3
 
-PNG/BMP/TIFF conversion to WebP quality 85
+[x] PNG/BMP/TIFF conversion to WebP quality 85
 
-Skip-list for already-compressed formats
+[x] Skip-list for already-compressed formats
 
-Skip compression when output would be larger
+[x] Skip compression when output would be larger
 
-Preserve original when image decoding fails
+[x] Preserve original when image decoding fails
 
-Return actual transformed .zst or .webp key
+[x] Return actual transformed `.zst` or `.webp` key
 
-Web UI using Jinja2 and dependency-free JavaScript
+[x] Web UI using Jinja2 and dependency-free JavaScript
 
-GUI upload, browse, prefix filtering, download, and confirmed delete
+[x] GUI upload, browse, prefix filtering, download, and confirmed delete
 
-API key stored only for the browser tab
+[x] API key stored only for the browser tab
 
-Docker Compose deployment
+[x] Docker Compose deployment
 
-Configuration through .env
+[x] Configuration through `.env`
 
-Garage integration and CRUD tests
+[x] Garage integration and CRUD tests
 
-Compression and UI tests
+[x] Compression and UI tests
 
-README, architecture, design, and contribution documentation
+[x] README, architecture, design, and contribution documentation
 
-Permissive license
+[x] Permissive license
+
 [x] Type hints enforced with mypy locally and in CI
 
 [x] Transparent zstd decompression on gateway download
 
 [x] Correct stored content type and filename metadata on download
 
-Finalize v1 scope and remove “draft” status
+[x] Finalize v1 scope and remove draft status
 
-Final product name and branding
+[x] Final product name and branding: S3 Backpack
 
 ## v1.1
 

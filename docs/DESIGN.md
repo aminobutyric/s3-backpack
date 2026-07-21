@@ -1,13 +1,13 @@
-# Product Design Document — Self-Hosted / Portable S3 Gateway
+# S3 Backpack Product Design Document
 
-Status: Draft v1
-Last updated: 2026-07-18
+Status: Final v1 scope
+Last updated: 2026-07-21
 
 ## 1. Problem & Pitch
 
 Self-hosters and technical users who work with object storage want a tool that lets them run their own S3-compatible storage anywhere Docker runs, without being locked into a single cloud provider — and without the storage bloat that comes from uploading files as-is.
 
-**Pitch:** *Your own S3, anywhere, that also shrinks your files for you.*
+**S3 Backpack pitch:** *Your own S3, anywhere, that also shrinks your files for you.*
 
 ## 2. Target Persona
 
@@ -48,9 +48,9 @@ Garage doesn't mount a drive as S3 directly — it owns a data directory pointed
 - **Formatting is always an explicit, user-confirmed action — never automatic.** On detecting a drive: if empty/unformatted, offer to format as XFS with explicit confirmation; if it already has data or another filesystem, surface it as usable-but-not-optimal and let the user opt in to reformatting. Auto-formatting on detection is a hard no — destroys trust with this audience if it destroys data.
 - **AI agent helper** — assists with cleanup (dedup/stale file detection), archiving (flagging cold files for tiering), and directory structure/naming suggestions (useful since S3 has no native folder concept). **Must propose, not act:** the agent generates a plan (what it would clean/archive/reorganize) and the user reviews and confirms before anything is moved or deleted. No silent autonomous action on user files — same trust boundary as the formatting flow, but ongoing rather than one-time, so it matters even more here.
 
-## 6. MVP Scope (sequenced)
+## 6. Final v1 Scope
 
-Previous draft stacked ~3 MVPs into one v1 (dual backend + drive detection + compression + UI all at once). Re-sequenced by real complexity/risk:
+Earlier planning stacked multiple milestones into v1. The finalized scope sequences them by complexity and risk:
 
 **v1 — true minimum:**
 - Storage abstraction layer (`storage/base.py` interface)
@@ -99,8 +99,9 @@ Previous draft stacked ~3 MVPs into one v1 (dual backend + drive detection + com
 - **Free/OSS core:** abstraction layer, self-hosted Garage integration, basic compression, local web UI. Permissive license (MIT/Apache — not BSL, which self-hosters distrust).
 - **Paid (later, not v1):** optional hosted version, advanced features (managed key recovery for encryption, multi-backend tiering, team/multi-user access).
 
-## 9. Open Questions
+## 9. Finalized Product Decisions
 
-- Finalize MVP in/out list (Section 6) — draft only so far.
-- Repo/package name and branding.
-- Docs structure for launch (README, ARCHITECTURE.md, CONTRIBUTING.md).
+- Product name: **S3 Backpack**
+- Core v1 scope: Garage backend, authenticated object CRUD, content-aware compression, transparent zstd downloads, web UI, and Docker Compose deployment
+- Cloud S3 support remains v1.1; external-drive management remains v1.2
+- Documentation structure: README plus architecture, design, progress, and contribution documents under `docs/`

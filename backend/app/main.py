@@ -7,9 +7,9 @@ from app.api import browse, delete, upload
 from app.ui.routes import router as ui_router
 
 app = FastAPI(
-    title="Self-Hosted S3 Gateway",
+    title="S3 Backpack",
     version="0.1.0",
-    description="Garage-backed S3-compatible gateway with authenticated CRUD APIs.",
+    description="Garage-backed S3-compatible storage with authenticated CRUD APIs.",
 )
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"

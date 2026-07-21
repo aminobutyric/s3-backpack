@@ -1,7 +1,7 @@
 services:
   garage:
     image: dxflrs/garage:v2.3.0
-    container_name: s3gw-garage
+    container_name: s3-backpack-garage
     restart: unless-stopped
     ports:
       - "3900:3900"   # S3 API
@@ -20,7 +20,8 @@ services:
 
   backend:
     build: ./backend
-    container_name: s3gw-backend
+    image: s3-backpack-backend:local
+    container_name: s3-backpack-backend
     restart: unless-stopped
     depends_on:
       - garage

@@ -1,4 +1,4 @@
-s3-gateway/
+s3-backpack/
 ├── backend/
 │   ├── app/
 │   │   ├── __init__.py
