@@ -1,9 +1,9 @@
-cat > .github/pull_request_template.md <<'EOF'
 ## Summary
 
 ## Testing
 
-- [ ] `cd backend && pytest`
+- [ ] `cd backend && python -m pytest`
+- [ ] `cd backend && python -m mypy app`
 
 ## Checklist
 

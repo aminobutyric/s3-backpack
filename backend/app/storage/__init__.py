@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from app.config import Settings, get_settings
-from app.storage.base import ObjectInfo, StorageBackend
+from app.storage.base import ObjectInfo, StorageBackend, StoredObject
 from app.storage.garage import GarageBackend
 
 
@@ -33,4 +33,10 @@ def get_storage_backend() -> StorageBackend:
     )
 
 
-__all__ = ["GarageBackend", "ObjectInfo", "StorageBackend", "get_storage_backend"]
+__all__ = [
+    "GarageBackend",
+    "ObjectInfo",
+    "StorageBackend",
+    "StoredObject",
+    "get_storage_backend",
+]

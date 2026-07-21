@@ -51,7 +51,7 @@ curl -sS -H "X-API-Key: dev-api-key-change-me" \
 
 curl -sS -H "X-API-Key: dev-api-key-change-me" \
   http://localhost:8000/api/objects/test/hello.txt.zst \
-  --output /tmp/hello.txt.zst
+  --output /tmp/hello.txt
 
 curl -sS -X DELETE -H "X-API-Key: dev-api-key-change-me" \
   http://localhost:8000/api/objects/test/hello.txt.zst
@@ -63,13 +63,11 @@ a `.webp` suffix. A transformation is used only when its output is smaller.
 Already-compressed formats such as ZIP, gzip, MP4, JPEG, WebP, and zstd are
 stored unchanged.
 
-This behavior is deliberately visible rather than transparent: Garage and
-other S3 clients see the transformed object and its real format. Decompress a
-downloaded text object with any zstd-compatible tool, for example:
-
-```bash
-zstd --decompress /tmp/hello.txt.zst
-```
+Garage and direct S3 clients see transformed objects in their stored format.
+Downloads through the gateway API and web UI transparently decompress zstd
+objects created by the gateway and restore their original filename and content
+type. Legacy `.zst` objects without gateway metadata are returned unchanged.
+WebP conversions remain WebP because that image conversion is lossy.
 
 The API documents its request and response schemas at
 `http://localhost:8000/docs`.

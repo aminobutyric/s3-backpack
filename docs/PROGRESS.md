@@ -39,11 +39,11 @@ Compression and UI tests
 README, architecture, design, and contribution documentation
 
 Permissive license
-[~] Type hints are present, but no mypy/pyright enforcement yet
+[x] Type hints enforced with mypy locally and in CI
 
-Transparent zstd decompression on download
+[x] Transparent zstd decompression on gateway download
 
-Correct stored content type and filename metadata on download
+[x] Correct stored content type and filename metadata on download
 
 Finalize v1 scope and remove “draft” status
 

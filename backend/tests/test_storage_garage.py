@@ -21,7 +21,7 @@ import pytest
 from botocore.response import StreamingBody
 from botocore.stub import Stubber
 
-from app.storage.base import ObjectInfo
+from app.storage.base import ObjectInfo, StoredObject
 from app.storage.garage import GarageBackend
 
 TEST_BUCKET = "default-bucket"
@@ -80,14 +80,54 @@ def test_put_object_returns_head_metadata(backend, stubber, test_key):
     )
 
 
-def test_get_object_reads_body(backend, stubber, test_key):
+def test_put_object_sends_user_metadata(backend, stubber, test_key):
+    modified = datetime(2026, 7, 18, 12, 30, tzinfo=UTC)
+    metadata = {"s3gw-compression": "zstd", "s3gw-original-size": "12"}
     stubber.add_response(
-        "get_object",
-        {"Body": StreamingBody(BytesIO(b"hello garage"), 12)},
+        "put_object",
+        {},
+        {
+            "Bucket": TEST_BUCKET,
+            "Key": test_key,
+            "Body": b"compressed",
+            "ContentType": "application/zstd",
+            "Metadata": metadata,
+        },
+    )
+    stubber.add_response(
+        "head_object",
+        {
+            "ContentLength": 10,
+            "LastModified": modified,
+            "ETag": '"abc123"',
+        },
         {"Bucket": TEST_BUCKET, "Key": test_key},
     )
 
-    assert backend.get_object(test_key) == b"hello garage"
+    backend.put_object(
+        test_key,
+        b"compressed",
+        content_type="application/zstd",
+        metadata=metadata,
+    )
+
+
+def test_get_object_reads_body(backend, stubber, test_key):
+    stubber.add_response(
+        "get_object",
+        {
+            "Body": StreamingBody(BytesIO(b"hello garage"), 12),
+            "ContentType": "text/plain",
+            "Metadata": {"source": "test"},
+        },
+        {"Bucket": TEST_BUCKET, "Key": test_key},
+    )
+
+    assert backend.get_object(test_key) == StoredObject(
+        data=b"hello garage",
+        content_type="text/plain",
+        metadata={"source": "test"},
+    )
 
 
 def test_list_objects_with_prefix(backend, stubber):
@@ -186,8 +226,17 @@ def real_backend():
 @real_garage
 def test_real_garage_put_and_get_object(real_backend, test_key):
     content = b"hello garage"
-    real_backend.put_object(test_key, content, content_type="text/plain")
-    assert real_backend.get_object(test_key) == content
+    metadata = {"source": "integration-test"}
+    real_backend.put_object(
+        test_key,
+        content,
+        content_type="text/plain",
+        metadata=metadata,
+    )
+    stored = real_backend.get_object(test_key)
+    assert stored.data == content
+    assert stored.content_type == "text/plain"
+    assert stored.metadata == metadata
 
 
 @real_garage

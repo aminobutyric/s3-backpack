@@ -4,7 +4,13 @@ s3-gateway/
 │   │   ├── __init__.py
 │   │   ├── main.py                # FastAPI entrypoint
 │   │   ├── config.py               # env-based config
-│   │   ├── web.py                  # server-rendered web UI entrypoint
+│   │   ├── ui/
+│   │   │   └── routes.py           # server-rendered web UI entrypoint
+│   │   ├── templates/               # Jinja2 UI templates
+│   │   │   ├── base.html
+│   │   │   ├── browse.html
+│   │   │   └── upload.html
+│   │   ├── static/                  # dependency-free browser CSS/JS
 │   │   ├── auth/
 │   │   │   ├── __init__.py
 │   │   │   ├── api_key.py          # API key generation/validation
@@ -26,11 +32,6 @@ s3-gateway/
 │   │   └── models/
 │   │       ├── __init__.py
 │   │       └── schemas.py          # typed request/response models
-│   ├── templates/                  # Jinja2 templates (htmx)
-│   │   ├── base.html
-│   │   ├── browse.html
-│   │   └── upload.html
-│   ├── static/                     # dependency-free browser CSS/JS
 │   ├── tests/
 │   │   ├── __init__.py
 │   │   ├── test_storage_garage.py

@@ -3,7 +3,7 @@ name: Backend Tests
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   backend-tests:
@@ -22,4 +22,8 @@ jobs:
 
       - name: Run tests
         working-directory: backend
-        run: pytest
+        run: python -m pytest
+
+      - name: Check types
+        working-directory: backend
+        run: python -m mypy app

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>S3 Gateway</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="frame">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-eyebrow">SELF-HOSTED</span>
+        <span class="brand-name">S3 Gateway</span>
+      </div>
+      <div class="keyfield">
+        <label for="api-key">API key</label>
+        <input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="X-API-Key" />
+        <span id="key-status" class="key-status" data-state="empty">not set</span>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      {% for tab in tabs %}
+      <button
+        class="tab crate{{ ' is-active' if tab.id == active_tab else '' }}"
+        role="tab"
+        data-tab="{{ tab.id }}"
+        aria-selected="{{ 'true' if tab.id == active_tab else 'false' }}"
+      >{{ tab.label }}</button>
+      {% endfor %}
+    </nav>
+
+    <main class="panels">
+      {% include "browse.html" %}
+      {% include "upload.html" %}
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

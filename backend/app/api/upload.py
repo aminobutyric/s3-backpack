@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 
 from app.auth.dependencies import require_api_key
 from app.compression import compress_upload
+from app.compression.metadata import build_compression_metadata
 from app.models.schemas import UploadResponse
 from app.storage import StorageBackend, get_storage_backend
 
@@ -27,7 +28,22 @@ async def upload_object(
     data = file.file.read()
     content_type = file.content_type or "application/octet-stream"
     result = compress_upload(object_key, data, content_type)
-    info = storage.put_object(result.key, result.data, result.content_type)
+    metadata = (
+        build_compression_metadata(
+            method=result.compression,
+            original_key=result.original_key,
+            original_content_type=content_type,
+            original_size=result.original_size,
+        )
+        if result.compression
+        else None
+    )
+    info = storage.put_object(
+        result.key,
+        result.data,
+        result.content_type,
+        metadata=metadata,
+    )
     savings_percent = (
         round((result.saved_bytes / result.original_size) * 100, 2)
         if result.original_size

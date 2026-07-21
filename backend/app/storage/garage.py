@@ -6,11 +6,14 @@ Nothing Garage-specific (endpoint quirks, path-style addressing) should
 leak past this file — callers only ever see `StorageBackend`.
 """
 
+from collections.abc import Mapping
+from typing import Any, cast
+
 import boto3
 from botocore.client import Config
 from botocore.exceptions import ClientError
 
-from app.storage.base import ObjectInfo, StorageBackend
+from app.storage.base import ObjectInfo, StorageBackend, StoredObject
 
 
 class GarageBackend(StorageBackend):
@@ -34,11 +37,21 @@ class GarageBackend(StorageBackend):
         )
 
     def put_object(
-        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+        self,
+        key: str,
+        data: bytes,
+        content_type: str = "application/octet-stream",
+        metadata: Mapping[str, str] | None = None,
     ) -> ObjectInfo:
-        self._client.put_object(
-            Bucket=self.bucket, Key=key, Body=data, ContentType=content_type
-        )
+        request: dict[str, Any] = {
+            "Bucket": self.bucket,
+            "Key": key,
+            "Body": data,
+            "ContentType": content_type,
+        }
+        if metadata:
+            request["Metadata"] = dict(metadata)
+        self._client.put_object(**request)
         head = self._client.head_object(Bucket=self.bucket, Key=key)
         return ObjectInfo(
             key=key,
@@ -47,10 +60,14 @@ class GarageBackend(StorageBackend):
             etag=head["ETag"].strip('"'),
         )
 
-    def get_object(self, key: str) -> bytes:
+    def get_object(self, key: str) -> StoredObject:
         try:
             resp = self._client.get_object(Bucket=self.bucket, Key=key)
-            return resp["Body"].read()
+            return StoredObject(
+                data=cast(bytes, resp["Body"].read()),
+                content_type=resp.get("ContentType", "application/octet-stream"),
+                metadata=dict(resp.get("Metadata", {})),
+            )
         except ClientError as e:
             if e.response["Error"]["Code"] in ("NoSuchKey", "404"):
                 raise FileNotFoundError(f"Object not found: {key}") from e

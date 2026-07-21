@@ -5,7 +5,8 @@
 ```bash
 cd backend
 python -m pip install -e ".[dev]"
-pytest
+python -m pytest
+python -m mypy app
 ```
 
 The default tests cover the Garage storage wrapper with botocore stubs and the

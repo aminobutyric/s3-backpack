@@ -9,6 +9,7 @@ of a rewrite.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 
@@ -18,6 +19,13 @@ class ObjectInfo:
     size: int
     last_modified: str  # ISO 8601
     etag: str
+
+
+@dataclass(frozen=True)
+class StoredObject:
+    data: bytes
+    content_type: str
+    metadata: dict[str, str]
 
 
 class StorageBackend(ABC):
@@ -30,13 +38,17 @@ class StorageBackend(ABC):
 
     @abstractmethod
     def put_object(
-        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+        self,
+        key: str,
+        data: bytes,
+        content_type: str = "application/octet-stream",
+        metadata: Mapping[str, str] | None = None,
     ) -> ObjectInfo:
         """Upload an object. Overwrites if key already exists."""
         raise NotImplementedError
 
     @abstractmethod
-    def get_object(self, key: str) -> bytes:
+    def get_object(self, key: str) -> StoredObject:
         """Download an object's full content. Raises FileNotFoundError if missing."""
         raise NotImplementedError
 
