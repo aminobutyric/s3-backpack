@@ -23,3 +23,29 @@ class UploadResponse(ObjectResponse):
 class DeleteResponse(BaseModel):
     key: str
     deleted: bool = True
+
+
+class DiskResponse(BaseModel):
+    name: str
+    path: str
+    device_type: str
+    parent_path: str | None
+    root_device_path: str
+    size: int = Field(ge=0)
+    filesystem: str | None
+    filesystem_version: str | None
+    label: str | None
+    uuid: str | None
+    mountpoints: list[str]
+    removable: bool
+    read_only: bool
+    transport: str | None
+    model: str | None
+    serial: str | None
+    system_disk: bool
+    ready: bool
+    blocking_reasons: list[str]
+
+
+class DiskInventoryResponse(BaseModel):
+    disks: list[DiskResponse]

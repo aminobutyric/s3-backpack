@@ -29,11 +29,15 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    volumes:
+      - rclone-config:/config/rclone
     environment:
       # Overrides .env's S3_ENDPOINT_URL: inside the compose network the
       # backend reaches Garage by service name, not localhost.
       S3_ENDPOINT_URL: http://garage:3900
+      RCLONE_CONFIG_PATH: /config/rclone/rclone.conf
 
 volumes:
   garage-meta:
   garage-data:
+  rclone-config:

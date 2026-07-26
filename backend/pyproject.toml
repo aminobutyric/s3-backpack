@@ -1,7 +1,7 @@
 [project]
 name = "s3-backpack-backend"
-version = "0.1.0"
-description = "S3 Backpack backend (v1: Garage storage, compression, and authentication)"
+version = "0.2.0"
+description = "Control plane for verified cloud S3 mirrors on attached storage"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.110,<0.116",

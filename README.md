@@ -3,7 +3,22 @@
 Garage-backed S3-compatible storage gateway with a small authenticated FastAPI
 surface for object CRUD.
 
-> Status: v1 scope finalized. The project is preparing for its first stable release.
+> Status: v0.2 product prototype. The earlier v1 scope was withdrawn before a
+> stable release while the project is refocused on portable, verified S3 mirrors.
+
+S3 Backpack is being developed to copy selected cloud S3 buckets onto an
+attached disk, verify the copy, and serve it through a local Garage S3 endpoint.
+The intended result is a portable cloud exit and offline recovery path rather
+than another general-purpose object browser.
+
+```text
+Cloud S3 -> rclone -> local Garage -> attached Backpack disk
+```
+
+The current codebase provides the Garage integration, authenticated object API,
+compression experiments, web UI, and test infrastructure. Disk onboarding,
+rclone job orchestration, transfer reports, and restore workflows are the v0.2
+implementation focus.
 
 ## Local Tests
 

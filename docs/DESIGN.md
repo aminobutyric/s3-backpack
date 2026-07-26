@@ -1,17 +1,23 @@
 # S3 Backpack Product Design Document
 
-Status: Final v1 scope
-Last updated: 2026-07-21
+Status: v0.2 product prototype
+Last updated: 2026-07-22
 
 ## 1. Problem & Pitch
 
-Self-hosters and technical users who work with object storage want a tool that lets them run their own S3-compatible storage anywhere Docker runs, without being locked into a single cloud provider — and without the storage bloat that comes from uploading files as-is.
+Self-hosters and small technical teams need an understandable way to keep a
+verified copy of cloud object data under their physical control. Existing tools
+can perform the transfer, but safely selecting a removable disk, provisioning a
+local S3 target, verifying a run, restoring data, and ejecting the disk still
+requires a collection of commands and operational knowledge.
 
-**S3 Backpack pitch:** *Your own S3, anywhere, that also shrinks your files for you.*
+**S3 Backpack pitch:** *A verified, portable local mirror of your cloud S3 data.*
 
 ## 2. Target Persona
 
-Primary: self-hosters, homelab operators, and data engineers (the "OSS crowd") — technical users running things on modest hardware (Pi, old NAS, home server), who evaluate tools by:
+Primary: self-hosters, homelab operators, and small data teams running on modest
+hardware who want an offline copy, a cloud exit path, or a physically portable
+dataset. They evaluate tools by:
 - No lock-in, no phone-home
 - Low resource footprint
 - Config-as-code (docker-compose + `.env`), not wizard-only
@@ -21,69 +27,62 @@ Primary: self-hosters, homelab operators, and data engineers (the "OSS crowd") �
 
 Not the initial target: non-technical "prosumer with a NAS" users. May become a secondary audience later via a hosted tier, not in v1.
 
-## 3. Core Differentiator & Hook
+## 3. Core Differentiator And Hook
 
-- **Moat (product, not architecture):** S3-compatible backend abstraction alone is table stakes in this space (MinIO, SeaweedFS, etc. all do it). The real moat is the *combination*: zero-config `docker-compose up` deployment + content-aware compression + trust-first UX (explicit confirmation on any destructive/autonomous action, no phone-home). No single piece is unique; the combination executed well for this persona is what's hard to copy.
-- **Hook (why someone tries it):** intelligent, content-aware compression that visibly shrinks storage use on upload — demoable, satisfying, easy to show in 30 seconds.
-
-Everything else (encryption, sync-folder, tiering, dedup) is a v2+ feature layered on top, not a competing differentiator.
+- **Differentiator:** rclone supplies proven transfer behavior and Garage supplies
+  the local S3 endpoint. S3 Backpack supplies the safety workflow around them:
+  disk identity, mount guards, capacity checks, non-destructive defaults,
+  verification reports, recovery instructions, and safe eject.
+- **Hook:** copy a cloud bucket to a disk, disconnect the network, and retrieve
+  the same objects from a local S3 endpoint.
+- **Trust boundary:** no formatting, deletion, destructive mirroring, or restore
+  overwrite occurs without a preview and explicit confirmation.
 
 ## 4. Architecture Overview
 
-Three-layer stack, with the key principle that layers only ever talk to each other over the S3 API — nothing is backend-specific outside layer 1:
+Four components have distinct ownership:
 
-1. **Storage backend** — either a real cloud S3 provider (AWS/Backblaze/etc.) or a self-hosted Garage instance, both speak the S3 API.
-2. **Backend service** — talks S3 API to whichever backend is active; handles compression, metadata, auth. This is where the abstraction lives.
-3. **Web UI** — upload/browse/manage; provider-agnostic because it only ever talks to the backend service.
+1. **Cloud S3 source** - AWS, R2, B2, Wasabi, or another S3-compatible service.
+2. **rclone transfer engine** - copies and verifies data using named remotes.
+3. **Garage local target** - receives objects through its S3 API and stores its
+   complete metadata and data state on the selected attached disk.
+4. **S3 Backpack control plane** - validates disks, plans jobs, invokes rclone,
+   records results, exposes progress, and coordinates safe startup and shutdown.
 
-Swapping cloud S3 for local Garage (or vice versa) should be a config change, not a code change.
+The data path is always `cloud S3 -> rclone -> Garage S3 API`. Rclone and S3
+Backpack must never write directly into Garage's metadata or data directories.
 
 ### Storage source note (Garage)
 Garage doesn't mount a drive as S3 directly — it owns a data directory pointed at a mounted volume/path and exposes an S3-compatible API in front of it. Any Docker-mountable volume works: internal disk, external USB/HDD, NFS/SMB share, etc.
 
-## 5. Notable Features (beyond core CRUD)
+## 5. v0.2 Scope
 
-- **USB/external drive auto-detect as storage source (v1.2, not core v1)** — Linux hosts only for v1 (Docker Desktop on Mac/Windows can't see host hotplug events). Detected drives can be used as a Garage storage backend.
-- **XFS as recommended filesystem for the data partition** — confirmed via Garage's own documentation: XFS is recommended for performance; EXT4 is discouraged due to inode limits under large object counts.
-- **Formatting is always an explicit, user-confirmed action — never automatic.** On detecting a drive: if empty/unformatted, offer to format as XFS with explicit confirmation; if it already has data or another filesystem, surface it as usable-but-not-optimal and let the user opt in to reformatting. Auto-formatting on detection is a hard no — destroys trust with this audience if it destroys data.
-- **AI agent helper** — assists with cleanup (dedup/stale file detection), archiving (flagging cold files for tiering), and directory structure/naming suggestions (useful since S3 has no native folder concept). **Must propose, not act:** the agent generates a plan (what it would clean/archive/reorganize) and the user reviews and confirms before anything is moved or deleted. No silent autonomous action on user files — same trust boundary as the formatting flow, but ongoing rather than one-time, so it matters even more here.
+- Linux block-device discovery using stable device identifiers
+- Read-only inspection before any storage action
+- Mount verification and protection against writes to an unmounted host path
+- Garage metadata and object data located together on the selected disk
+- Named cloud and local rclone remotes
+- Source bucket/prefix selection and capacity preflight
+- Non-destructive backup using `rclone copy`
+- One-way post-transfer verification using `rclone check`
+- Progress, cancellation, structured logs, and a durable transfer manifest
+- Local object browsing and S3 endpoint credentials
+- Non-destructive restore from the Backpack disk to cloud S3
+- Coordinated Garage shutdown and safe disk eject
 
-## 6. Final v1 Scope
+## 6. Safety Invariants
 
-Earlier planning stacked multiple milestones into v1. The finalized scope sequences them by complexity and risk:
-
-**v1 — true minimum:**
-- Storage abstraction layer (`storage/base.py` interface)
-- **One backend: self-hosted Garage only** (cloud S3 deferred — see v1.1)
-- **Auth: API key or basic auth, required.** Not optional even for single-user self-hosting — undefended object storage on a network is a real vulnerability, not scope creep.
-- Compression, with specific v1 rules (not just "content-aware"):
-  - Images → WebP, quality 85
-  - Text/logs → zstd, level 3
-  - Skip-list (already compressed, don't touch): `.zip`, `.gz`, `.mp4`, `.jpg`
-  - Store transformed objects under an extension matching their real format
-    (`.webp` or `.zst`) and return that key to the caller
-  - Keep the original unchanged when compression would increase its size or
-    when input decoding fails
-- Web UI: htmx + Jinja2 (or vanilla JS + FastAPI static files) — upload, browse, delete. Not React: this audience wants to open DevTools and understand what's happening; small bundle matters on a Pi.
-- `docker-compose up` deployment, config via `.env`
-
-**v1.1:**
-- Cloud S3 backend support (second implementation of the same `storage/base.py` interface — proves the abstraction actually holds)
-
-**v1.2:**
-- USB/external drive auto-detect as Garage storage source (Linux host only)
-- Explicit-confirm XFS formatting flow
-- This was pulled out of core v1 deliberately: it needs host-level udev access, likely a privileged sidecar/helper container, and careful partition-table parsing — a distinct sub-project, not a checkbox alongside compression and UI work.
-
-**Explicitly out of v1/v1.1/v1.2 (backlog for v2+):**
-- Hosted/SaaS tier, multi-tenancy, billing
-- Client-side zero-knowledge encryption
-- Sync-watch-folder mode
-- Multi-backend mirroring / hot-cold tiering
-- Dedup
-- AI agent helper (cleanup/archive/directory-structure suggestions, confirm-before-act)
-- Shareable links with expiry
-- API keys / access tokens for external scripts (beyond the basic v1 auth)
+- A transfer is bound to the selected disk UUID, not only a mount path.
+- Backup mode never deletes destination objects.
+- Mirror mode is out of v0.2; it will require a dry-run deletion preview.
+- Restore never deletes cloud objects by default.
+- A failed or incomplete verification is visible and cannot be reported as a
+  successful backup.
+- Formatting is out of v0.2. Existing supported filesystems are used as-is.
+- The first release does not claim to preserve bucket IAM, lifecycle rules,
+  object versions, legal holds, or every provider-specific metadata field.
+- Replicated buckets preserve object bytes and keys; content transformation is
+  disabled in the replication path.
 
 ## 7. Stack Decisions
 
@@ -99,9 +98,12 @@ Earlier planning stacked multiple milestones into v1. The finalized scope sequen
 - **Free/OSS core:** abstraction layer, self-hosted Garage integration, basic compression, local web UI. Permissive license (MIT/Apache — not BSL, which self-hosters distrust).
 - **Paid (later, not v1):** optional hosted version, advanced features (managed key recovery for encryption, multi-backend tiering, team/multi-user access).
 
-## 9. Finalized Product Decisions
+## 9. Current Product Decisions
 
 - Product name: **S3 Backpack**
-- Core v1 scope: Garage backend, authenticated object CRUD, content-aware compression, transparent zstd downloads, web UI, and Docker Compose deployment
-- Cloud S3 support remains v1.1; external-drive management remains v1.2
+- Product stage: v0.2 prototype; no stable release has been made
+- Core workflow: cloud S3 to a verified Garage mirror on an attached disk
+- Transfer engine: rclone, invoked through structured arguments without a shell
+- Default transfer semantics: one-way, non-destructive copy
+- Existing compression work remains experimental and is not used for mirrors
 - Documentation structure: README plus architecture, design, progress, and contribution documents under `docs/`
