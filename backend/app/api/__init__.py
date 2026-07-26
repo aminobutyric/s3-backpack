@@ -1,3 +1,3 @@
-from app.api import browse, delete, upload
+from app.api import browse, delete, disks, upload
 
-__all__ = ["browse", "delete", "upload"]
+__all__ = ["browse", "delete", "disks", "upload"]

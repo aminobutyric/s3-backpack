@@ -1,6 +1,9 @@
 # Product Checklist
 
-## v1
+Status: v0.2 prototype. The withdrawn `v1.0.0` tag did not represent a stable
+release and is no longer published.
+
+## Prototype Foundation
 
 [x] Storage abstraction interface
 
@@ -46,31 +49,51 @@
 
 [x] Correct stored content type and filename metadata on download
 
-[x] Finalize v1 scope and remove draft status
+[x] Product name and branding: S3 Backpack
 
-[x] Final product name and branding: S3 Backpack
+## v0.2 Portable Mirror
 
-## v1.1
+[x] Define cloud S3 to rclone to Garage data flow
 
-Cloud S3 backend
+[x] Define non-destructive backup and restore defaults
 
-Validate that backend switching is configuration-only
+[x] Typed rclone command and execution layer
 
-## v1.2
+[x] Read-only Linux block-device discovery and classification
 
-Linux USB/external-drive detection
+[x] Stable disk identity using filesystem UUID
 
-Garage data-directory configuration for detected drives
+[x] Whole-system-disk rejection based on child mountpoints
 
-Filesystem inspection
+[ ] Least-privilege host inventory bridge for Docker
 
-XFS recommendation flow
+[ ] Read-only filesystem and capacity inspection
 
-Explicitly confirmed formatting
+[ ] Protection against an absent or incorrectly mounted target disk
 
-Protection against formatting drives containing data
+[ ] Garage metadata and data placement on the selected disk
 
-## v2+ Backlog
+[ ] Cloud S3 remote configuration
+
+[ ] Source bucket and prefix selection
+
+[ ] Capacity preflight
+
+[ ] Asynchronous backup jobs with progress and cancellation
+
+[x] One-way post-copy verification foundation
+
+[ ] Durable JSON transfer manifests
+
+[ ] Restore workflow
+
+[ ] Safe Garage shutdown and disk eject
+
+[ ] End-to-end test with a real S3-compatible cloud source
+
+[ ] Move product status from prototype to release candidate
+
+## Later Backlog
 
 Hosted/SaaS tier
 
@@ -79,6 +102,14 @@ Multi-tenancy and billing
 Client-side zero-knowledge encryption
 
 Watched-folder synchronization
+
+Explicit mirror mode with deletion preview
+
+Bidirectional synchronization
+
+S3 version-history backup
+
+Bucket IAM, lifecycle, retention, and legal-hold replication
 
 Multi-backend mirroring and storage tiering
 
